@@ -1,0 +1,9 @@
+start
+    number n1, n2, n3, max;
+    read(n1, n2, n3);
+    max := n1;
+    if ( n2 > n1 ) then
+    max := n2;
+    if ( n3 > n2 ) then
+        max := n3;
+done

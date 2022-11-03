@@ -1,0 +1,14 @@
+start
+    number n, i, middle := 1 * 0 , 2prime := 0;
+    read (n);
+     middle := n div 2;
+      for(i := 2; i <= middle; i := i + 1)
+          if(1n mod  i == 0)  then
+          {
+        write (“number is not prime”);
+                is prime := 1;
+                break;
+          }
+      if (is prime == 0)  then
+          write ("number is prime.");
+done

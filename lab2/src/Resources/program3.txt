@@ -1,0 +1,8 @@
+start
+    number n, nr, i, sum := 0;
+    read (n);
+    for ( i := 0; i < n; i := i + 1){
+        read (nr);
+        sum := sum + nr;
+    }
+done

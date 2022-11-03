@@ -1,0 +1,12 @@
+start
+    number a, b, result;
+    read (a, b);
+    if (a > b) then
+        result := b;
+    else
+        result := a;
+    while (result > 0)
+        if (a mod result == 0 and b mod result == 0) then
+            break
+        result := result - 1;
+done
