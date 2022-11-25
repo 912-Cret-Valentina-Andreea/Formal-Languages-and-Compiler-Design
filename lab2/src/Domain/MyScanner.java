@@ -83,11 +83,19 @@ public class MyScanner {
     }
 
     public boolean isIdentifier(String token) {
-        return token.matches("[a-zA-Z]+[a-zA-Z0-9]*");
+        FA finiteAutomata = new FA("src/Resources/FAidentifier.in");
+        return finiteAutomata.verifySequence(token);
+//        return token.matches("[a-zA-Z]+[a-zA-Z0-9]*");
     }
 
     public boolean isConstant(String token) {
-        return token.matches("\"[a-zA-Z0-9]+\"|'[a-zA-Z0-9]'|[0-9]|[1-9][0-9]*");
+        try {
+            int intToken = Integer.parseInt(token);
+        } catch (NumberFormatException nfe){
+            return token.matches("\"[a-zA-Z0-9]*\"|'[a-zA-Z0-9]'|[0-9]|[1-9][0-9]*|\\+[0-9]|[1-9][0-9]]|-[0-9]|[1-9][0-9]|\\+[1-9]|-[1-9]]");
+        }
+        FA finiteAutomata = new FA("src/Resources/FAconstant.in");
+        return finiteAutomata.verifySequence(token);
     }
 
     public int addConstantOrSymbol(String token) throws IOException {
