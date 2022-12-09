@@ -107,4 +107,24 @@ public class Grammar {
                 System.out.println("This option does not exist!");
         }
     }
+
+    public void SOUTProductionsForNonterminal(String nonterminal){
+        for(Production production: productions){
+            if(production.leftPart.contains(nonterminal)){
+                System.out.println(production);
+            }
+            else if(production.rightPart.contains(nonterminal)){
+                System.out.println(production);
+            }
+        }
+    }
+
+    public boolean CFG() {
+        for (Production production : productions) {
+            if (production.leftPart.size() > 1) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
