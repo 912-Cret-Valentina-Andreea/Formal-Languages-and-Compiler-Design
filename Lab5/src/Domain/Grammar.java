@@ -17,6 +17,21 @@ public class Grammar {
         readGrammar(file);
     }
 
+    public Grammar(){
+        terminals = new ArrayList<>();
+        nonterminals = new ArrayList<>();
+        productions = new ArrayList<>();
+        start = "";
+    }
+
+    public List<String> getTerminals(){
+        return this.terminals;
+    }
+
+    public List<String> getNonterminals(){
+        return this.nonterminals;
+    }
+
     public void readGrammar(String filename){
         File grammarFile = new File(filename);
         Scanner scanner;
@@ -30,20 +45,23 @@ public class Grammar {
             start = line;
         }
         if(scanner.hasNextLine()){
-            var line = scanner.next();
+            var line = scanner.nextLine();
             terminals = List.of(line.split(","));
         }
         if(scanner.hasNextLine()){
-            var line = scanner.next();
+            var line = scanner.nextLine();
             nonterminals = List.of(line.split(","));
         }
 
         while(scanner.hasNextLine()){
-            var line = scanner.next();
+            var line = scanner.nextLine();
             List<String> productionline = Arrays.asList(line.split("->"));
-            List<String> rightPart = Arrays.asList(productionline.get(1).split("\\|"));
             List<String> leftPart = Arrays.asList(productionline.get(0).split(","));
-            productions.add(new Production(leftPart, rightPart));
+            List<String> allRightPart = Arrays.asList(productionline.get(1).split("\\|"));
+            for(int i = 0; i< allRightPart.size(); i++){
+                List<String> rightPart = Arrays.asList(allRightPart.get(i).split(","));
+                productions.add(new Production(leftPart, rightPart));
+            }
         }
     }
 
@@ -108,15 +126,22 @@ public class Grammar {
         }
     }
 
-    public void SOUTProductionsForNonterminal(String nonterminal){
-        for(Production production: productions){
-            if(production.leftPart.contains(nonterminal)){
-                System.out.println(production);
-            }
-            else if(production.rightPart.contains(nonterminal)){
+    public void SOUTProductionsForNonterminal(String nonterminal) {
+        for (Production production : productions) {
+            if (production.leftPart.contains(nonterminal)) {
                 System.out.println(production);
             }
         }
+    }
+
+    public List<Production> getProductionsForNonterminal(String nonterminal){
+        List<Production> result = new ArrayList<>();
+        for(Production production: productions) {
+            if (production.leftPart.contains(nonterminal)) {
+                result.add(production);
+            }
+        }
+        return result;
     }
 
     public boolean CFG() {

@@ -1,0 +1,11 @@
+S
+a,+,*,(,)
+S,A,B,C,D
+S->B,A
+A->+,B,A
+A->EPS
+B->D,C
+C->*,D,C
+C->EPS
+D->(,S,)
+D->a
