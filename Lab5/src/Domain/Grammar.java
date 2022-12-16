@@ -28,6 +28,11 @@ public class Grammar {
         return this.terminals;
     }
 
+    public String getStart(){
+        return this.start;
+    }
+
+
     public List<String> getNonterminals(){
         return this.nonterminals;
     }

@@ -18,7 +18,7 @@ public class Parser {
 
     private void generateSets(){
         generateFirst();
-        generateFollow();
+     //   generateFollow();
         System.out.println(printFirst());
     }
 
@@ -110,7 +110,7 @@ public class Parser {
         for (String nonterminal : grammar.getNonterminals()) {
             followSet.put(nonterminal, new HashSet<>());
         }
-        followSet.get(grammar.get()).add("epsilon");
+        followSet.get(grammar.getStart()).add("epsilon");
 
         //rest of iterations
         var isChanged = true;
