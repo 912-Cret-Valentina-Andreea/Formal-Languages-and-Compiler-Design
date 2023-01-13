@@ -37,6 +37,14 @@ public class Grammar {
         return this.nonterminals;
     }
 
+    public int getProductionIndex(Production production){
+        return productions.indexOf(production);
+    }
+
+    public Production getProduction(int index){
+        return productions.get(index);
+    }
+
     public void readGrammar(String filename){
         File grammarFile = new File(filename);
         Scanner scanner;
@@ -113,7 +121,7 @@ public class Grammar {
                 System.out.println("Enter a nonterminal: " + "\n");
                 try {
                     var nonterminal = reader.readLine();
-                    SOUTProductionsForNonterminal(nonterminal);
+                    SOUTProductionsForNonterminalLHS(nonterminal);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -131,7 +139,7 @@ public class Grammar {
         }
     }
 
-    public void SOUTProductionsForNonterminal(String nonterminal) {
+    public void SOUTProductionsForNonterminalLHS(String nonterminal) {
         for (Production production : productions) {
             if (production.leftPart.contains(nonterminal)) {
                 System.out.println(production);
@@ -139,10 +147,20 @@ public class Grammar {
         }
     }
 
-    public List<Production> getProductionsForNonterminal(String nonterminal){
+    public List<Production> getProductionsForNonterminalLHS(String nonterminal){
         List<Production> result = new ArrayList<>();
         for(Production production: productions) {
             if (production.leftPart.contains(nonterminal)) {
+                result.add(production);
+            }
+        }
+        return result;
+    }
+
+    public List<Production> getProductionsForNonterminalRHS(String nonterminal){
+        List<Production> result = new ArrayList<>();
+        for(Production production: productions) {
+            if (production.rightPart.contains(nonterminal)) {
                 result.add(production);
             }
         }

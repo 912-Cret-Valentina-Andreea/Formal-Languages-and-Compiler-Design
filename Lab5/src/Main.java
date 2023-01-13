@@ -1,4 +1,5 @@
 import Domain.Grammar;
+import Domain.ParseTable;
 import Domain.Parser;
 
 import java.io.IOException;
@@ -11,5 +12,7 @@ public class Main {
 //        grammar.run();
 
         Parser parser = new Parser();
+
+        ParseTable parseTable = new ParseTable(parser);
     }
 }

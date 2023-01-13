@@ -4,9 +4,9 @@ import java.util.*;
 
 public class Parser {
 
-    private Grammar grammar;
-    private Map<String, Set<String>> firstSet;
-    private Map<String, Set<String>> followSet;
+    public Grammar grammar;
+    public Map<String, Set<String>> firstSet;
+    public Map<String, Set<String>> followSet;
 
     public Parser(){
         this.grammar = new Grammar();
@@ -16,50 +16,67 @@ public class Parser {
         generateSets();
     }
 
-    private void generateSets(){
+    public void generateSets(){
         generateFirst();
-     //   generateFollow();
+        generateFollow();
         System.out.println(printFirst());
+        System.out.println(printFollow());
     }
 
-    private void generateFirst(){
+    public void generateFirst(){
+        //parse every nonterminal
         for(String nonterminal : grammar.getNonterminals()){
             firstSet.put(nonterminal, new HashSet<>());
-            List<Production> productionsForNonterminal = grammar.getProductionsForNonterminal(nonterminal);
+            List<Production> productionsForNonterminal = grammar.getProductionsForNonterminalLHS(nonterminal);
+            //parse every production for that nonterminal
             for(Production production: productionsForNonterminal){
+                //initialize first with the first terminal in the production or epsilon(if the right part of a production is epsilon)
                 if(grammar.getTerminals().contains(production.rightPart.get(0)) || production.rightPart.get(0).equals("EPS"))
                     firstSet.get(nonterminal).add(production.rightPart.get(0));
             }
         }
 
         boolean isChanged = true;
+        //while the columns are still diferent (when the column will not be modified anymore we can stop)
         while(isChanged){
             isChanged = false;
             HashMap<String, Set<String>> newColumn = new HashMap<>();
-            for(String nonterminal : grammar.getNonterminals()){
+            //parse every nonterminal
+            for(String nonterminal : grammar.getNonterminals()) {
                 Set<String> toAdd = new HashSet<>(firstSet.get(nonterminal));
-                List<Production> productionsForNonterminal = grammar.getProductionsForNonterminal(nonterminal);
-                for(Production production: productionsForNonterminal){
+                List<Production> productionsForNonterminal = grammar.getProductionsForNonterminalLHS(nonterminal);
+                //parse every production for that nonterminal
+                for (Production production : productionsForNonterminal) {
                     List<String> nonTerminalsFromRHS = new ArrayList<>();
                     String terminalFromRHS = "";
-                    for(String symbol : production.rightPart){
-                        if(this.grammar.getNonterminals().contains(symbol)){
+                    //parse every symbol from the right-hand side and put in 2 variables all the nonterminals until a terminal, and the first terminal
+                    for (String symbol : production.rightPart) {
+                        if (this.grammar.getNonterminals().contains(symbol)) {
+                            //put every nonterminal
                             nonTerminalsFromRHS.add(symbol);
-                        }
-                        else{
+                        } else {
+                            //put first terminal
                             terminalFromRHS = symbol;
                             break;
                         }
                     }
-                    toAdd.addAll(concatenation(nonTerminalsFromRHS,terminalFromRHS));
+                    //concatenate the nonterminals and the terminal from above and add it to the cell corresponding to the nonterminal we are at
+                    toAdd.addAll(concatenation(nonTerminalsFromRHS, terminalFromRHS));
                 }
+                //if what we need to add is different that what we had before we need to continue the iterations
                 if (!toAdd.equals(firstSet.get(nonterminal))) {
                     isChanged = true;
                 }
-                newColumn.put(nonterminal,toAdd);
+                //put for every nonterminal the new cell
+                newColumn.put(nonterminal, toAdd);
             }
             firstSet=newColumn;
         }
+
+        for(String terminal: grammar.getTerminals()) {
+            firstSet.put(terminal, Set.of(terminal));
+        }
+        firstSet.put("EPS", Set.of("EPS"));
     }
 
     private Set<String> concatenation(List<String> nonterminals, String terminal){
@@ -105,66 +122,76 @@ public class Parser {
         });
         return builder.toString();
     }
-    public void generateFollow() {
-        //initialization
-        for (String nonterminal : grammar.getNonterminals()) {
-            followSet.put(nonterminal, new HashSet<>());
+
+    public void generateFollow(){
+        HashMap<String, Set<String>> lastColumn = new HashMap<>();
+        HashMap<String, Set<String>> currentColumn = new HashMap<>();
+        //initialize every cell of the current column with the empty list
+        for(String nonterminal: grammar.getNonterminals()){
+            currentColumn.put(nonterminal, Set.of());
         }
-        followSet.get(grammar.getStart()).add("epsilon");
+        //initialize the starting nonterminal with epsilon
+        currentColumn.put(grammar.getStart(), Set.of("EPS"));
 
-        //rest of iterations
-        var isChanged = true;
-        while (isChanged) {
+        boolean isChanged = true;
+        //while the currentColumn is different than the lastColumn
+        while(isChanged){
             isChanged = false;
-            HashMap<String, Set<String>> newColumn = new HashMap<>();
+            //last column becomes the current one
+            lastColumn = new HashMap<>(currentColumn);
+            //current column gets reinitialized
+            currentColumn = new HashMap<>();
 
-            for (String nonterminal : grammar.getNonterminals()) {
-                newColumn.put(nonterminal, new HashSet<>());
-                var productionsWithNonterminalInRhs = new HashMap<String, Set<List<String>>>();
-                var allProductions = grammar.getProductionsForNonterminal(nonterminal);
-                allProductions.forEach((k, v) -> {
-                    for (var eachProduction : v) {
-                        if (eachProduction.contains(nonterminal)) {
-                            var key = k.iterator().next();
-                            if (!productionsWithNonterminalInRhs.containsKey(key))
-                                productionsWithNonterminalInRhs.put(key, new HashSet<>());
-                            productionsWithNonterminalInRhs.get(key).add(eachProduction);
+            //parse through every nonterminal
+            for(String nonterminal: grammar.getNonterminals()){
+                var followCell = new HashSet<String>();
+                //get all the productions where the nonterminal is present in the right hand side
+                var productions = grammar.getProductionsForNonterminalRHS(nonterminal);
+
+                //to the current cell we append what we had before in the cell from the last column
+                followCell.addAll(lastColumn.get(nonterminal));
+
+                //we parse every production with the nonterminal in the right hand side
+                for(Production production: productions){
+                    var nonterminalPosInProduction = production.rightPart.indexOf(nonterminal);
+                    //if the nonterminal is not the last one in the production (ex for A: S -> AB)
+                    if(nonterminalPosInProduction < production.rightPart.size()-1){
+                        //we will parse the first table for the element after the current nonterminal
+                        for(String symbol: firstSet.get(production.rightPart.get(nonterminalPosInProduction+1))){
+                            //if between the symbols in the first table is epsilon we add to the current column the last
+                            //column from the follow table from the nonterminal in the left hand side of the production
+                            if(symbol.equals("EPS")){
+                                followCell.addAll(lastColumn.get(production.leftPart.get(0)));
+                            }
+                            //if not, we just add the cell of the first table for the nonterminal after the current nonterminal
+                            else{
+                                followCell.addAll(firstSet.get(production.rightPart.get(nonterminalPosInProduction+1)));
+                            }
                         }
                     }
-                });
-                var toAdd = new HashSet<>(followSet.get(nonterminal));
-                productionsWithNonterminalInRhs.forEach((k, v) -> {
-                    for (var production : v) {
-                        var productionList = (ArrayList<String>) production;
-                        for (var indexOfNonterminal = 0; indexOfNonterminal < productionList.size(); ++indexOfNonterminal)
-                            if (productionList.get(indexOfNonterminal).equals(nonterminal)) {
-                                if (indexOfNonterminal + 1 == productionList.size()) {
-                                    toAdd.addAll(followSet.get(k));
-                                } else {
-                                    var followSymbol = productionList.get(indexOfNonterminal + 1);
-                                    if (grammar.getTerminals().contains(followSymbol))
-                                        toAdd.add(followSymbol);
-                                    else {
-                                        for (var symbol : firstSet.get(followSymbol)) {
-                                            if (symbol.equals("epsilon"))
-                                                toAdd.addAll(followSet.get(k));
-                                            else
-                                                toAdd.addAll(firstSet.get(followSymbol));
-                                        }
-                                    }
-                                }
-                            }
+                    //if the terminal is the last one in the production we add the cell from the last column for the nonterminal in the left part
+                    else{
+                        followCell.addAll(lastColumn.get(production.leftPart.get(0)));
                     }
-                });
-                if (!toAdd.equals(followSet.get(nonterminal))) {
+                }
+                //we put the new calculated cell into the current column
+                currentColumn.put(nonterminal, followCell);
+                //if the current column is the same as the last column the follow table is done and the set is complete
+                if(!lastColumn.get(nonterminal).equals(currentColumn.get(nonterminal))){
                     isChanged = true;
                 }
-                newColumn.put(nonterminal, toAdd);
             }
-
-            followSet = newColumn;
-
         }
+        followSet = currentColumn;
     }
+
+    public String printFollow() {
+        StringBuilder builder = new StringBuilder();
+        followSet.forEach((k, v) -> {
+            builder.append(k).append(": ").append(v).append("\n");
+        });
+        return builder.toString();
+    }
+
 }
 
