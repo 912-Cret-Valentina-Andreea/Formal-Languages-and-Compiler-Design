@@ -12,7 +12,7 @@ public class Parser {
         this.grammar = new Grammar();
         this.firstSet = new HashMap<>();
         this.followSet = new HashMap<>();
-        this.grammar.readGrammar("src/Resources/g3.txt");
+        this.grammar.readGrammar("src/Resources/g4.txt");
         generateSets();
     }
 

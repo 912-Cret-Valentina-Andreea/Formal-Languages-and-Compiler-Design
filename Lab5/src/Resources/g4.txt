@@ -1,0 +1,11 @@
+S
+=,i,bool,a,b,2,true
+S,T,V,A,N
+S->A
+A->T,N,=,V
+T->i
+T->bool
+V->2
+V->true
+N->a
+N->b
