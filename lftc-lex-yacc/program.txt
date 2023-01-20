@@ -1,0 +1,12 @@
+start
+	int a;
+	int b;
+	read(a);
+	read(b);
+	int sum;
+	sum := 0;
+	sum := a + b;
+	if (sum / 2 == 1) then
+		sum = sum * 10;
+	write(sum);	
+done
